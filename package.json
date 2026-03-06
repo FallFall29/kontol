@@ -1,0 +1,9 @@
+{
+  "name": "qris-production",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@upstash/redis": "^1.28.4",
+    "qrcode": "^1.5.4"
+  }
+}
