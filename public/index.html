@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>QRIS Payment - Fallshop</title>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#2f80ed,#56ccf2);
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
+}
+
+.card{
+background:white;
+padding:35px;
+border-radius:16px;
+width:380px;
+text-align:center;
+box-shadow:0 15px 35px rgba(0,0,0,0.15);
+}
+
+.logo{
+font-size:20px;
+font-weight:bold;
+margin-bottom:10px;
+}
+
+.subtitle{
+font-size:13px;
+color:#666;
+margin-bottom:20px;
+}
+
+input{
+width:100%;
+padding:12px;
+border-radius:8px;
+border:1px solid #ddd;
+font-size:14px;
+}
+
+button{
+width:100%;
+padding:12px;
+margin-top:12px;
+border:none;
+border-radius:8px;
+background:#2f80ed;
+color:white;
+font-size:15px;
+cursor:pointer;
+transition:0.2s;
+}
+
+button:hover{
+background:#1b63c5;
+}
+
+#qrcode{
+margin-top:20px;
+}
+
+.qrbox{
+background:#fafafa;
+padding:15px;
+border-radius:10px;
+border:1px solid #eee;
+}
+
+.status{
+margin-top:15px;
+font-weight:bold;
+font-size:14px;
+}
+
+.pending{
+color:#f39c12;
+}
+
+.success{
+color:#27ae60;
+}
+
+.timer{
+font-size:13px;
+color:#777;
+margin-top:6px;
+}
+
+.loading{
+margin-top:10px;
+font-size:13px;
+color:#888;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<div class="logo">QRIS Fallshop cuy</div>
+<div class="subtitle">Scan QR untuk melakukan pembayaran</div>
+
+<input type="number" id="nominal" placeholder="Masukkan Nominal">
+
+<button onclick="createQR()">Buat QRIS</button>
+
+<div id="qrcode"></div>
+
+<div id="status" class="status"></div>
+<div id="timer" class="timer"></div>
+
+</div>
+
+<script>
+
+let currentRRN = null
+let countdown = 300
+let timerInterval = null
+
+
+// =======================
+// CREATE QR
+// =======================
+
+async function createQR(){
+
+const nominal = document.getElementById("nominal").value
+
+if(!nominal){
+alert("Masukkan nominal dulu")
+return
+}
+
+document.getElementById("qrcode").innerHTML =
+'<div class="loading">Membuat QR...</div>'
+
+const res = await fetch("/api/create",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+amount:nominal
+})
+})
+
+const data = await res.json()
+
+document.getElementById("qrcode").innerHTML =
+'<div class="qrbox"><img src="'+data.qr+'" width="260"></div>'
+
+document.getElementById("status").innerText =
+"Status: Menunggu Pembayaran"
+
+document.getElementById("status").className =
+"status pending"
+
+currentRRN = data.id
+
+localStorage.setItem(
+"qris_session",
+JSON.stringify(data)
+)
+
+startCountdown()
+
+checkStatus()
+
+}
+
+
+// =======================
+// COUNTDOWN TIMER
+// =======================
+
+function startCountdown(){
+
+countdown = 300
+
+if(timerInterval){
+clearInterval(timerInterval)
+}
+
+timerInterval = setInterval(function(){
+
+countdown--
+
+let menit = Math.floor(countdown/60)
+let detik = countdown % 60
+
+document.getElementById("timer").innerText =
+"Expired dalam "+menit+"m "+detik+"s"
+
+if(countdown <= 0){
+
+clearInterval(timerInterval)
+
+document.getElementById("status").innerText =
+"QR Expired"
+
+document.getElementById("status").className =
+"status"
+
+localStorage.removeItem("qris_session")
+
+}
+
+},1000)
+
+}
+
+
+// =======================
+// CHECK PAYMENT STATUS
+// =======================
+
+async function checkStatus(){
+
+if(!currentRRN) return
+
+const res = await fetch("/api/status/"+currentRRN)
+
+const data = await res.json()
+
+if(data.status === "SUCCESS"){
+
+document.getElementById("status").innerText =
+"Status: PAID ✅"
+
+document.getElementById("status").className =
+"status success"
+
+alert("Pembayaran Berhasil")
+
+localStorage.removeItem("qris_session")
+
+}else{
+
+setTimeout(checkStatus,5000)
+
+}
+
+}
+
+
+// =======================
+// LOAD SESSION
+// =======================
+
+function loadSession(){
+
+const saved =
+localStorage.getItem("qris_session")
+
+if(!saved) return
+
+const data = JSON.parse(saved)
+
+document.getElementById("qrcode").innerHTML =
+'<div class="qrbox"><img src="'+data.qr+'" width="260"></div>'
+
+document.getElementById("status").innerText =
+"Status: Menunggu Pembayaran"
+
+document.getElementById("status").className =
+"status pending"
+
+currentRRN = data.id
+
+startCountdown()
+
+checkStatus()
+
+}
+
+
+// =======================
+// TAB SWITCH FIX
+// =======================
+
+document.addEventListener(
+"visibilitychange",
+function(){
+
+if(document.visibilityState === "visible"){
+loadSession()
+}
+
+}
+)
+
+
+// =======================
+// PAGE LOAD
+// =======================
+
+document.addEventListener(
+"DOMContentLoaded",
+loadSession
+)
+
+</script>
+
+</body>
+</html>

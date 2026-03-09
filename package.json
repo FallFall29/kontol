@@ -1,0 +1,10 @@
+{
+  "name": "qris-vercel",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@upstash/redis": "^1.36.3",
+    "qrcode": "^1.5.4",
+    "uuid": "^9.0.1"
+  }
+}
