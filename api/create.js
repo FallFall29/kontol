@@ -1,5 +1,5 @@
-import QRCode from "qrcode"
-import { createPayment } from "../lib/payment.js"
+const QRCode = require("qrcode")
+const { createPayment } = require("../lib/payment.js")
 
 const QRIS_STATIC =
   "00020101021126670016COM.NOBUBANK.WWW01189360050300000902820214350220556151030303UMI51440014ID.CO.QRIS.WWW0215ID20254059297900303UMI5204541153033605802ID5910FALL SHOPP6006BEKASI61051711162070703A0163046714"
@@ -27,33 +27,24 @@ function generateQRIS(amount) {
   const nominal = parseInt(amount).toString()
   const tagAmount = "54" + nominal.length.toString().padStart(2, "0") + nominal
   qris = qris.replace("5802ID", tagAmount + "5802ID")
-  const crc = crc16(qris)
-  return qris + crc
+  return qris + crc16(qris)
 }
 
-export default async function handler(req, res) {
-
+module.exports = async (req, res) => {
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" })
   }
 
-  const body = req.body
-  const amount = body.amount
-
+  const amount = req.body?.amount
   if (!amount || isNaN(amount) || parseInt(amount) < 1) {
     return res.status(400).json({ message: "Amount tidak valid" })
   }
 
-  // Generate RRN unik sebagai ID transaksi
   const rrn = Date.now().toString() + Math.floor(Math.random() * 1000).toString().padStart(3, "0")
-
-  // Generate QRIS dinamis
   const qrisString = generateQRIS(amount)
 
-  // Simpan transaksi ke Redis dengan status PENDING
   await createPayment(rrn, parseInt(amount))
 
-  // Convert ke gambar QR
   const qrImage = await QRCode.toDataURL(qrisString)
 
   return res.json({
@@ -63,5 +54,4 @@ export default async function handler(req, res) {
     qr: qrImage,
     expired: 300
   })
-
 }
