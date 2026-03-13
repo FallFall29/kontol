@@ -2,319 +2,572 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>QRIS Payment - Fallshop</title>
-
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment - Fallshop</title>
 <style>
 
-*{
-box-sizing:border-box;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #0d0d0d;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
 }
 
-body{
-font-family:Arial;
-background:linear-gradient(135deg,#2f80ed,#56ccf2);
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-margin:0;
+/* HEADER */
+.header {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0 24px;
 }
 
-.card{
-background:white;
-padding:35px;
-border-radius:16px;
-width:380px;
-text-align:center;
-box-shadow:0 15px 35px rgba(0,0,0,0.15);
+.menu-btn {
+  background: #1e1e1e;
+  border: none;
+  color: #fff;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.logo{
-font-size:20px;
-font-weight:bold;
-margin-bottom:10px;
+.coins-badge {
+  background: #1e1e1e;
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 13px;
+  color: #aaa;
+  letter-spacing: 1px;
 }
 
-.subtitle{
-font-size:13px;
-color:#666;
-margin-bottom:20px;
+.profile-btn {
+  background: #1e1e1e;
+  border: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
 }
 
-input{
-width:100%;
-padding:12px;
-border-radius:8px;
-border:1px solid #ddd;
-font-size:14px;
+/* INVOICE */
+.invoice-id {
+  width: 100%;
+  max-width: 480px;
+  font-size: 11px;
+  color: #555;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
 }
 
-button{
-width:100%;
-padding:12px;
-margin-top:12px;
-border:none;
-border-radius:8px;
-background:#2f80ed;
-color:white;
-font-size:15px;
-cursor:pointer;
-transition:0.2s;
+.page-title {
+  width: 100%;
+  max-width: 480px;
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
 }
 
-button:hover{
-background:#1b63c5;
+.page-sub {
+  width: 100%;
+  max-width: 480px;
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 20px;
 }
 
-#qrcode{
-margin-top:20px;
+/* COUNTDOWN */
+.countdown-wrap {
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 20px;
 }
 
-.qrbox{
-background:#fafafa;
-padding:15px;
-border-radius:10px;
-border:1px solid #eee;
+.countdown-box {
+  display: inline-block;
+  background: #1a1a1a;
+  border-radius: 20px;
+  padding: 10px 22px;
+  font-size: 22px;
+  font-weight: bold;
+  font-family: monospace;
+  letter-spacing: 2px;
 }
 
-.status{
-margin-top:15px;
-font-weight:bold;
-font-size:14px;
+/* FORM INPUT */
+.input-wrap {
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 10px;
 }
 
-.pending{
-color:#f39c12;
+.input-wrap input {
+  flex: 1;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 15px;
+  color: #fff;
+  outline: none;
 }
 
-.success{
-color:#27ae60;
+.input-wrap input::placeholder { color: #555; }
+.input-wrap input:focus { border-color: #00ccff; }
+
+.btn-buat {
+  background: #00ccff;
+  color: #000;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 22px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
 }
 
-.timer{
-font-size:13px;
-color:#777;
-margin-top:6px;
+.btn-buat:hover { background: #00aadd; }
+.btn-buat:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+/* QR CARD */
+.qr-card {
+  width: 100%;
+  max-width: 480px;
+  background: #151515;
+  border-radius: 20px;
+  border: 1px solid #222;
+  overflow: hidden;
+  margin-bottom: 16px;
 }
 
-.loading{
-margin-top:10px;
-font-size:13px;
-color:#888;
+.qr-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #222;
 }
+
+.qr-card-title {
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.qr-tab-active {
+  background: #00ccff;
+  color: #000;
+  border-radius: 8px;
+  padding: 4px 14px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.qr-body {
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 220px;
+}
+
+.qr-body img {
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px;
+  max-width: 260px;
+  width: 100%;
+}
+
+.qr-placeholder {
+  color: #444;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* DETAIL CARD */
+.detail-card {
+  width: 100%;
+  max-width: 480px;
+  background: #151515;
+  border-radius: 20px;
+  border: 1px solid #222;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #1e1e1e;
+  font-size: 14px;
+}
+
+.detail-row:last-child { border-bottom: none; }
+.detail-label { color: #777; }
+.detail-value { font-weight: bold; }
+.detail-value.total { color: #00ccff; font-size: 16px; }
+
+/* STATUS */
+.status-wrap {
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: bold;
+  min-height: 24px;
+}
+
+.status-pending { color: #f39c12; }
+.status-success { color: #2ecc71; font-size: 18px; }
+.status-expired { color: #e74c3c; }
+
+/* BACK BUTTON */
+.btn-back {
+  width: 100%;
+  max-width: 480px;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  color: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-bottom: 12px;
+}
+
+.btn-back:hover { background: #222; }
+
+/* INSTRUKSI */
+.instruksi {
+  width: 100%;
+  max-width: 480px;
+  background: #151515;
+  border-radius: 16px;
+  border: 1px solid #222;
+  padding: 18px 20px;
+  font-size: 13px;
+  color: #aaa;
+  line-height: 1.8;
+}
+
+.instruksi strong { color: #fff; display: block; margin-bottom: 8px; }
 
 </style>
 </head>
-
 <body>
 
-<div class="card">
-
-<div class="logo">QRIS Fallshop cuy</div>
-<div class="subtitle">Scan QR untuk melakukan pembayaran</div>
-
-<input type="number" id="nominal" placeholder="Masukkan Nominal">
-
-<button onclick="createQR()">Buat QRIS</button>
-
-<div id="qrcode"></div>
-
-<div id="status" class="status"></div>
-<div id="timer" class="timer"></div>
-
+<!-- HEADER -->
+<div class="header">
+  <button class="menu-btn">☰</button>
+  <div class="coins-badge">COINS: <span id="coinsVal">0</span></div>
+  <button class="profile-btn">👤</button>
 </div>
+
+<!-- INVOICE & TITLE -->
+<div class="invoice-id" id="invoiceId">#INV-...</div>
+<div class="page-title">PAYMENT</div>
+<div class="page-sub">Complete your payment</div>
+
+<!-- COUNTDOWN -->
+<div class="countdown-wrap">
+  <div class="countdown-box" id="countdown">--:--</div>
+</div>
+
+<!-- INPUT NOMINAL -->
+<div class="input-wrap">
+  <input type="number" id="nominal" placeholder="Masukkan nominal (Rp)" min="1">
+  <button class="btn-buat" id="btnBuat" onclick="createQR()">Buat QRIS</button>
+</div>
+
+<!-- QR CARD -->
+<div class="qr-card">
+  <div class="qr-card-header">
+    <span class="qr-card-title">SCAN QRIS</span>
+    <span class="qr-tab-active">QRIS</span>
+  </div>
+  <div class="qr-body" id="qrBody">
+    <div class="qr-placeholder">Masukkan nominal dan klik Buat QRIS</div>
+  </div>
+</div>
+
+<!-- STATUS -->
+<div class="status-wrap" id="statusWrap"></div>
+
+<!-- DETAIL HARGA -->
+<div class="detail-card" id="detailCard" style="display:none">
+  <div class="detail-row">
+    <span class="detail-label">Nominal</span>
+    <span class="detail-value" id="detNominal">-</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Biaya Admin</span>
+    <span class="detail-value" id="detFee">Rp0</span>
+  </div>
+  <div class="detail-row">
+    <span class="detail-label">Total</span>
+    <span class="detail-value total" id="detTotal">-</span>
+  </div>
+</div>
+
+<!-- INSTRUKSI -->
+<div class="instruksi" id="instruksiBox" style="display:none">
+  <strong>Instructions:</strong>
+  1. Open your e-wallet app (DANA, GoPay, OVO, etc.)<br>
+  2. Scan the QRIS code above<br>
+  3. Pay exactly <strong id="instrTotal">Rp0</strong>
+</div>
+
+<!-- BACK BUTTON -->
+<button class="btn-back" onclick="resetForm()">Back</button>
 
 <script>
 
 let currentRRN = null
-let countdown = 300
 let timerInterval = null
+let statusTimeout = null
+let isPolling = false
 
+function formatRupiah(angka) {
+  return "Rp" + parseInt(angka).toLocaleString("id-ID")
+}
+
+function generateInvoiceId() {
+  const now = new Date()
+  const d = now.toISOString().slice(2,10).replace(/-/g,"")
+  const t = now.toTimeString().slice(0,8).replace(/:/g,"")
+  const rand = Math.random().toString(36).slice(2,6).toUpperCase()
+  return "#INV-" + d + "-" + t + "-" + rand
+}
 
 // =======================
 // CREATE QR
 // =======================
+async function createQR() {
+  const nominal = document.getElementById("nominal").value
+  if (!nominal || parseInt(nominal) < 1) {
+    alert("Masukkan nominal dulu")
+    return
+  }
 
-async function createQR(){
+  stopPolling()
 
-const nominal = document.getElementById("nominal").value
+  document.getElementById("btnBuat").disabled = true
+  document.getElementById("qrBody").innerHTML = '<div class="qr-placeholder">Membuat QR...</div>'
+  document.getElementById("statusWrap").innerHTML = ""
+  document.getElementById("detailCard").style.display = "none"
+  document.getElementById("instruksiBox").style.display = "none"
 
-if(!nominal){
-alert("Masukkan nominal dulu")
-return
+  // Set invoice id
+  document.getElementById("invoiceId").innerText = generateInvoiceId()
+
+  try {
+    const res = await fetch("/api/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: nominal })
+    })
+
+    const data = await res.json()
+
+    if (!data.id || !data.qr) throw new Error("Response tidak valid")
+
+    // Tampilkan QR
+    document.getElementById("qrBody").innerHTML =
+      '<img src="' + data.qr + '" alt="QRIS">'
+
+    // Tampilkan detail harga
+    const fee = 0
+    const total = parseInt(nominal) + fee
+    document.getElementById("detNominal").innerText = formatRupiah(nominal)
+    document.getElementById("detFee").innerText = formatRupiah(fee)
+    document.getElementById("detTotal").innerText = formatRupiah(total)
+    document.getElementById("instrTotal").innerText = formatRupiah(total)
+    document.getElementById("detailCard").style.display = "block"
+    document.getElementById("instruksiBox").style.display = "block"
+
+    // Status
+    document.getElementById("statusWrap").innerHTML =
+      '<span class="status-pending">⏳ Status: Menunggu Pembayaran</span>'
+
+    currentRRN = data.id
+
+    // Simpan session
+    localStorage.setItem("qris_session", JSON.stringify({
+      id: data.id,
+      qr: data.qr,
+      amount: nominal,
+      created_at: Date.now()
+    }))
+
+    startCountdown(300)
+    startPolling()
+
+  } catch(e) {
+    document.getElementById("qrBody").innerHTML = '<div class="qr-placeholder">Gagal membuat QR. Coba lagi.</div>'
+    document.getElementById("statusWrap").innerHTML = '<span class="status-expired">❌ Error: ' + e.message + '</span>'
+  }
+
+  document.getElementById("btnBuat").disabled = false
 }
 
-document.getElementById("qrcode").innerHTML =
-'<div class="loading">Membuat QR...</div>'
+// =======================
+// COUNTDOWN
+// =======================
+function startCountdown(detikMulai) {
+  let sisa = detikMulai
+  if (timerInterval) clearInterval(timerInterval)
 
-const res = await fetch("/api/create",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-amount:nominal
-})
-})
+  timerInterval = setInterval(function() {
+    sisa--
+    const m = Math.floor(sisa / 60).toString().padStart(2, "0")
+    const s = (sisa % 60).toString().padStart(2, "0")
+    document.getElementById("countdown").innerText = m + ":" + s
 
-const data = await res.json()
-
-document.getElementById("qrcode").innerHTML =
-'<div class="qrbox"><img src="'+data.qr+'" width="260"></div>'
-
-document.getElementById("status").innerText =
-"Status: Menunggu Pembayaran"
-
-document.getElementById("status").className =
-"status pending"
-
-currentRRN = data.id
-
-localStorage.setItem(
-"qris_session",
-JSON.stringify(data)
-)
-
-startCountdown()
-
-checkStatus()
-
+    if (sisa <= 0) {
+      clearInterval(timerInterval)
+      stopPolling()
+      document.getElementById("statusWrap").innerHTML = '<span class="status-expired">⏰ QR Expired</span>'
+      document.getElementById("countdown").innerText = "00:00"
+      localStorage.removeItem("qris_session")
+      currentRRN = null
+    }
+  }, 1000)
 }
 
-
 // =======================
-// COUNTDOWN TIMER
+// POLLING STATUS
 // =======================
-
-function startCountdown(){
-
-countdown = 300
-
-if(timerInterval){
-clearInterval(timerInterval)
+function startPolling() {
+  if (isPolling) return
+  isPolling = true
+  pollStatus()
 }
 
-timerInterval = setInterval(function(){
-
-countdown--
-
-let menit = Math.floor(countdown/60)
-let detik = countdown % 60
-
-document.getElementById("timer").innerText =
-"Expired dalam "+menit+"m "+detik+"s"
-
-if(countdown <= 0){
-
-clearInterval(timerInterval)
-
-document.getElementById("status").innerText =
-"QR Expired"
-
-document.getElementById("status").className =
-"status"
-
-localStorage.removeItem("qris_session")
-
+function stopPolling() {
+  isPolling = false
+  if (statusTimeout) clearTimeout(statusTimeout)
+  if (timerInterval) clearInterval(timerInterval)
+  statusTimeout = null
+  timerInterval = null
 }
 
-},1000)
+async function pollStatus() {
+  if (!isPolling || !currentRRN) return
 
+  try {
+    const res = await fetch("/api/status/" + currentRRN)
+    const data = await res.json()
+
+    if (data.status === "SUCCESS") {
+      stopPolling()
+      document.getElementById("statusWrap").innerHTML = '<span class="status-success">✅ PAID — Pembayaran Berhasil!</span>'
+      document.getElementById("countdown").innerText = "✓"
+      localStorage.removeItem("qris_session")
+      currentRRN = null
+      return
+    }
+
+    if (data.status === "EXPIRED") {
+      stopPolling()
+      document.getElementById("statusWrap").innerHTML = '<span class="status-expired">⏰ QR Expired</span>'
+      localStorage.removeItem("qris_session")
+      currentRRN = null
+      return
+    }
+
+    if (isPolling) statusTimeout = setTimeout(pollStatus, 5000)
+
+  } catch(e) {
+    if (isPolling) statusTimeout = setTimeout(pollStatus, 5000)
+  }
 }
 
-
 // =======================
-// CHECK PAYMENT STATUS
+// LOAD SESSION (refresh)
 // =======================
+function loadSession() {
+  const saved = localStorage.getItem("qris_session")
+  if (!saved) return
 
-async function checkStatus(){
+  let session
+  try { session = JSON.parse(saved) } catch(e) {
+    localStorage.removeItem("qris_session")
+    return
+  }
 
-if(!currentRRN) return
+  const umur = Date.now() - session.created_at
+  if (umur >= 300000) {
+    localStorage.removeItem("qris_session")
+    return
+  }
 
-const res = await fetch("/api/status/"+currentRRN)
+  const sisaDetik = Math.floor((300000 - umur) / 1000)
 
-const data = await res.json()
+  document.getElementById("invoiceId").innerText = generateInvoiceId()
+  document.getElementById("qrBody").innerHTML = '<img src="' + session.qr + '" alt="QRIS">'
+  document.getElementById("statusWrap").innerHTML = '<span class="status-pending">⏳ Status: Menunggu Pembayaran</span>'
 
-if(data.status === "SUCCESS"){
+  if (session.amount) {
+    document.getElementById("detNominal").innerText = formatRupiah(session.amount)
+    document.getElementById("detFee").innerText = "Rp0"
+    document.getElementById("detTotal").innerText = formatRupiah(session.amount)
+    document.getElementById("instrTotal").innerText = formatRupiah(session.amount)
+    document.getElementById("detailCard").style.display = "block"
+    document.getElementById("instruksiBox").style.display = "block"
+  }
 
-document.getElementById("status").innerText =
-"Status: PAID ✅"
-
-document.getElementById("status").className =
-"status success"
-
-alert("Pembayaran Berhasil")
-
-localStorage.removeItem("qris_session")
-
-}else{
-
-setTimeout(checkStatus,5000)
-
+  currentRRN = session.id
+  startCountdown(sisaDetik)
+  startPolling()
 }
 
+// =======================
+// RESET
+// =======================
+function resetForm() {
+  stopPolling()
+  currentRRN = null
+  localStorage.removeItem("qris_session")
+  document.getElementById("qrBody").innerHTML = '<div class="qr-placeholder">Masukkan nominal dan klik Buat QRIS</div>'
+  document.getElementById("statusWrap").innerHTML = ""
+  document.getElementById("countdown").innerText = "--:--"
+  document.getElementById("nominal").value = ""
+  document.getElementById("detailCard").style.display = "none"
+  document.getElementById("instruksiBox").style.display = "none"
+  document.getElementById("invoiceId").innerText = "#INV-..."
 }
 
-
-// =======================
-// LOAD SESSION
-// =======================
-
-function loadSession(){
-
-const saved =
-localStorage.getItem("qris_session")
-
-if(!saved) return
-
-const data = JSON.parse(saved)
-
-document.getElementById("qrcode").innerHTML =
-'<div class="qrbox"><img src="'+data.qr+'" width="260"></div>'
-
-document.getElementById("status").innerText =
-"Status: Menunggu Pembayaran"
-
-document.getElementById("status").className =
-"status pending"
-
-currentRRN = data.id
-
-startCountdown()
-
-checkStatus()
-
-}
-
-
-// =======================
-// TAB SWITCH FIX
-// =======================
-
-document.addEventListener(
-"visibilitychange",
-function(){
-
-if(document.visibilityState === "visible"){
-loadSession()
-}
-
-}
-)
-
-
-// =======================
-// PAGE LOAD
-// =======================
-
-document.addEventListener(
-"DOMContentLoaded",
-loadSession
-)
+document.addEventListener("DOMContentLoaded", loadSession)
 
 </script>
-
 </body>
 </html>
