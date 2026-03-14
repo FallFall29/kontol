@@ -36,8 +36,8 @@ module.exports = async (req, res) => {
   }
 
   const amount = req.body?.amount
-  if (!amount || isNaN(amount) || parseInt(amount) < 1) {
-    return res.status(400).json({ message: "Amount tidak valid" })
+  if (!amount || isNaN(amount) || parseInt(amount) < 500) {
+    return res.status(400).json({ message: "Minimal deposit Rp500" })
   }
 
   const rrn = Date.now().toString() + Math.floor(Math.random() * 1000).toString().padStart(3, "0")
