@@ -373,8 +373,8 @@ function generateInvoiceId() {
 // =======================
 async function createQR() {
   const nominal = document.getElementById("nominal").value
-  if (!nominal || parseInt(nominal) < 1) {
-    alert("Masukkan nominal dulu")
+  if (!nominal || parseInt(nominal) < 500) {
+    alert("Minimal deposit Rp500")
     return
   }
 
