@@ -47,8 +47,8 @@ module.exports = async (req, res) => {
   }
 
   const amount = req.body?.amount
-  if (!amount || isNaN(amount) || parseInt(amount) < 1) {
-    return res.status(400).json({ success: false, message: "Field 'amount' wajib diisi dan minimal 1" })
+  if (!amount || isNaN(amount) || parseInt(amount) < 500) {
+    return res.status(400).json({ success: false, message: "Minimal deposit Rp500" })
   }
 
   try {
