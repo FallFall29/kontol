@@ -3,354 +3,1337 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Payment - Fallshop</title>
+<title>Fallshop — QRIS Payment</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* ================================
+   BASE
+================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: #0d0d0d;
-  color: #fff;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px 16px;
+:root {
+  --bg:        #080808;
+  --bg2:       #0f0f0f;
+  --bg3:       #161616;
+  --bg4:       #1c1c1c;
+  --border:    #222;
+  --border2:   #2a2a2a;
+  --text:      #f0f0f0;
+  --text2:     #888;
+  --text3:     #444;
+  --accent:    #00e5ff;
+  --accent2:   #0099bb;
+  --green:     #00e676;
+  --orange:    #ff9800;
+  --red:       #ff5252;
+  --blue:      #448aff;
+  --mono:      'Space Mono', monospace;
+  --sans:      'Sora', sans-serif;
 }
 
-/* HEADER */
-.header {
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ================================
+   LAYOUT — PAGES
+================================ */
+.page { display: none; min-height: 100vh; }
+.page.active { display: flex; }
+
+/* ================================
+   PAYMENT PAGE
+================================ */
+#page-payment {
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px 40px;
+  position: relative;
+}
+
+/* background grid */
+#page-payment::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,229,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#page-payment > * { position: relative; z-index: 1; }
+
+/* TOP NAV */
+.topnav {
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 0 24px;
+  padding: 20px 0 28px;
 }
 
-.menu-btn {
-  background: #1e1e1e;
-  border: none;
-  color: #fff;
-  width: 42px;
-  height: 42px;
-  border-radius: 10px;
-  font-size: 18px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.coins-badge {
-  background: #1e1e1e;
-  border-radius: 20px;
-  padding: 8px 18px;
+.nav-logo {
+  font-family: var(--mono);
   font-size: 13px;
-  color: #aaa;
-  letter-spacing: 1px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
-.profile-btn {
-  background: #1e1e1e;
-  border: none;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
+.nav-right { display: flex; align-items: center; gap: 10px; }
+
+.nav-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  font-size: 20px;
+  transition: all 0.2s;
 }
+
+.nav-btn:hover { border-color: var(--accent); color: var(--accent); }
 
 /* INVOICE */
-.invoice-id {
+.inv-label {
   width: 100%;
-  max-width: 480px;
-  font-size: 11px;
-  color: #555;
-  letter-spacing: 1px;
-  margin-bottom: 6px;
+  max-width: 520px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  letter-spacing: 2px;
   text-transform: uppercase;
+  margin-bottom: 8px;
 }
 
-.page-title {
+.page-heading {
   width: 100%;
-  max-width: 480px;
-  font-size: 36px;
-  font-weight: 900;
-  letter-spacing: 3px;
+  max-width: 520px;
+  font-size: 52px;
+  font-weight: 800;
+  letter-spacing: 6px;
   text-transform: uppercase;
-  margin-bottom: 4px;
+  line-height: 1;
+  margin-bottom: 8px;
 }
+
+.page-heading span { color: var(--accent); }
 
 .page-sub {
   width: 100%;
-  max-width: 480px;
-  font-size: 13px;
-  color: #777;
-  margin-bottom: 20px;
+  max-width: 520px;
+  font-size: 12px;
+  color: var(--text3);
+  letter-spacing: 1px;
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--border);
 }
 
 /* COUNTDOWN */
-.countdown-wrap {
+.cd-wrap {
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   margin-bottom: 20px;
 }
 
-.countdown-box {
-  display: inline-block;
-  background: #1a1a1a;
-  border-radius: 20px;
-  padding: 10px 22px;
-  font-size: 22px;
-  font-weight: bold;
-  font-family: monospace;
-  letter-spacing: 2px;
+.cd-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 9px 20px;
 }
 
-/* FORM INPUT */
-.input-wrap {
+.cd-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+.cd-time {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--text);
+}
+
+/* INPUT */
+.input-row {
   width: 100%;
-  max-width: 480px;
-  margin-bottom: 16px;
+  max-width: 520px;
   display: flex;
+  flex-direction: column;
   gap: 10px;
+  margin-bottom: 16px;
 }
 
-.input-wrap input {
-  flex: 1;
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
-  border-radius: 12px;
-  padding: 14px 16px;
+.input-row input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  font-family: var(--sans);
   font-size: 15px;
-  color: #fff;
+  color: var(--text);
   outline: none;
+  transition: all 0.2s;
 }
 
-.input-wrap input::placeholder { color: #555; }
-.input-wrap input:focus { border-color: #00ccff; }
+.input-row input::placeholder { color: var(--text3); }
+.input-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,229,255,0.08); }
 
-.btn-buat {
-  background: #00ccff;
+.btn-create {
+  width: 100%;
+  background: var(--accent);
   color: #000;
   border: none;
-  border-radius: 12px;
-  padding: 14px 22px;
-  font-size: 14px;
-  font-weight: bold;
+  border-radius: 14px;
+  padding: 16px 24px;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
   cursor: pointer;
-  transition: 0.2s;
-  white-space: nowrap;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
 }
 
-.btn-buat:hover { background: #00aadd; }
-.btn-buat:disabled { background: #333; color: #666; cursor: not-allowed; }
+.btn-create:hover { background: #33eeff; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,229,255,0.2); }
+.btn-create:disabled { background: var(--bg4); color: var(--text3); transform: none; cursor: not-allowed; box-shadow: none; }
 
 /* QR CARD */
 .qr-card {
   width: 100%;
-  max-width: 480px;
-  background: #151515;
+  max-width: 520px;
+  background: var(--bg3);
   border-radius: 20px;
-  border: 1px solid #222;
+  border: 1px solid var(--border);
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
-.qr-card-header {
+.qr-card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid #222;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
 }
 
-.qr-card-title {
-  font-size: 12px;
-  font-weight: bold;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: #fff;
-}
-
-.qr-tab-active {
-  background: #00ccff;
-  color: #000;
-  border-radius: 8px;
-  padding: 4px 14px;
+.qr-card-label {
+  font-family: var(--mono);
   font-size: 11px;
-  font-weight: bold;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: var(--text2);
+  text-transform: uppercase;
+}
+
+.qr-badge {
+  background: var(--accent);
+  color: #000;
+  border-radius: 6px;
+  padding: 3px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .qr-body {
-  padding: 24px;
+  padding: 28px;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 220px;
+  min-height: 230px;
 }
 
 .qr-body img {
-  border-radius: 12px;
+  border-radius: 16px;
   background: #fff;
-  padding: 10px;
-  max-width: 260px;
+  padding: 12px;
+  max-width: 270px;
+  width: 100%;
+  box-shadow: 0 0 60px rgba(0,229,255,0.12), 0 0 20px rgba(0,229,255,0.06);
+}
+
+.qr-empty {
+  color: var(--text3);
+  font-size: 13px;
+  text-align: center;
+  line-height: 2;
+}
+
+.qr-empty .icon { font-size: 32px; display: block; margin-bottom: 8px; opacity: 0.3; }
+
+/* STATUS */
+.status-bar {
+  width: 100%;
+  max-width: 520px;
+  text-align: center;
+  min-height: 36px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.s-pending {
+  color: var(--orange);
+  background: rgba(255,152,0,0.08);
+  border: 1px solid rgba(255,152,0,0.2);
+  border-radius: 100px;
+  padding: 8px 20px;
   width: 100%;
 }
 
-.qr-placeholder {
-  color: #444;
-  font-size: 13px;
-  text-align: center;
+.s-success {
+  color: var(--green);
+  background: rgba(0,230,118,0.08);
+  border: 1px solid rgba(0,230,118,0.2);
+  border-radius: 100px;
+  padding: 8px 20px;
+  font-size: 15px;
+  width: 100%;
+}
+
+.s-expired {
+  color: var(--red);
+  background: rgba(255,82,82,0.08);
+  border: 1px solid rgba(255,82,82,0.2);
+  border-radius: 100px;
+  padding: 8px 20px;
+  width: 100%;
 }
 
 /* DETAIL CARD */
 .detail-card {
   width: 100%;
-  max-width: 480px;
-  background: #151515;
-  border-radius: 20px;
-  border: 1px solid #222;
-  padding: 20px;
-  margin-bottom: 16px;
+  max-width: 520px;
+  background: var(--bg3);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  padding: 4px 20px;
+  margin-bottom: 12px;
 }
 
 .detail-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid #1e1e1e;
-  font-size: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
 }
 
 .detail-row:last-child { border-bottom: none; }
-.detail-label { color: #777; }
-.detail-value { font-weight: bold; }
-.detail-value.total { color: #00ccff; font-size: 16px; }
-
-/* STATUS */
-.status-wrap {
-  width: 100%;
-  max-width: 480px;
-  text-align: center;
-  margin-bottom: 16px;
-  font-size: 14px;
-  font-weight: bold;
-  min-height: 24px;
-}
-
-.status-pending { color: #f39c12; }
-.status-success { color: #2ecc71; font-size: 18px; }
-.status-expired { color: #e74c3c; }
-
-/* BACK BUTTON */
-.btn-back {
-  width: 100%;
-  max-width: 480px;
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
-  color: #fff;
-  border-radius: 14px;
-  padding: 16px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: 0.2s;
-  margin-bottom: 12px;
-}
-
-.btn-back:hover { background: #222; }
+.detail-key { color: var(--text2); font-weight: 400; }
+.detail-val { font-weight: 600; font-family: var(--mono); font-size: 12px; }
+.detail-val.accent { color: var(--accent); font-size: 15px; }
 
 /* INSTRUKSI */
 .instruksi {
   width: 100%;
-  max-width: 480px;
-  background: #151515;
-  border-radius: 16px;
-  border: 1px solid #222;
-  padding: 18px 20px;
+  max-width: 520px;
+  background: var(--bg3);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  padding: 16px 20px;
+  font-size: 12.5px;
+  color: var(--text2);
+  line-height: 2;
+  margin-bottom: 12px;
+}
+
+.instruksi .ins-title {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* BACK BTN */
+.btn-back {
+  width: 100%;
+  max-width: 520px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  border-radius: 14px;
+  padding: 15px;
+  font-family: var(--sans);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+  letter-spacing: 0.3px;
+}
+
+.btn-back:hover { border-color: var(--text2); color: var(--text); background: var(--bg3); }
+
+/* DOC BTN */
+.btn-docs {
+  width: 100%;
+  max-width: 520px;
+  background: transparent;
+  border: 1px dashed var(--border2);
+  color: var(--text3);
+  border-radius: 14px;
+  padding: 13px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.btn-docs:hover { border-color: var(--accent); color: var(--accent); border-style: solid; }
+
+/* ================================
+   DOCS PAGE
+================================ */
+#page-docs {
+  flex-direction: row;
+  align-items: stretch;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 250px;
+  min-height: 100vh;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  position: fixed;
+  top: 0; left: 0;
+  overflow-y: auto;
+  padding: 24px 0;
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+.sidebar-brand {
+  padding: 0 20px 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.sidebar-brand .brand-name {
+  font-family: var(--mono);
   font-size: 13px;
-  color: #aaa;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+}
+
+.sidebar-brand .brand-sub {
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 3px;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 12px 16px;
+  padding: 9px 14px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 12px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--sans);
+}
+
+.sidebar-back:hover { border-color: var(--accent); color: var(--accent); }
+
+.sidebar-section {
+  padding: 12px 20px 4px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.sidebar a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  color: var(--text2);
+  text-decoration: none;
+  font-size: 12.5px;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+  font-family: var(--sans);
+}
+
+.sidebar a .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+.sidebar a:hover { color: var(--text); background: var(--bg3); border-left-color: var(--border2); }
+.sidebar a.active { color: var(--accent); background: rgba(0,229,255,0.04); border-left-color: var(--accent); }
+.sidebar a.active .dot { background: var(--accent); }
+
+/* DOCS CONTENT */
+.docs-content {
+  margin-left: 250px;
+  flex: 1;
+  padding: 48px 56px;
+  max-width: calc(100vw - 250px);
+}
+
+/* DOCS COVER */
+.docs-cover {
+  margin-bottom: 64px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--border);
+}
+
+.docs-cover-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.docs-cover-title {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  margin-bottom: 12px;
+}
+
+.docs-cover-title span { color: var(--accent); }
+
+.docs-cover-sub {
+  font-size: 15px;
+  color: var(--text2);
+  margin-bottom: 24px;
+}
+
+.docs-cover-url {
+  display: inline-block;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+}
+
+.docs-meta {
+  display: flex;
+  gap: 20px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.docs-meta-item {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 12px;
+}
+
+.docs-meta-item .k { color: var(--text3); margin-right: 6px; font-family: var(--mono); font-size: 10px; }
+.docs-meta-item .v { color: var(--text); font-weight: 600; }
+
+/* SECTION */
+.doc-section { margin-bottom: 72px; }
+
+.doc-h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: -0.3px;
+}
+
+.doc-h1::before {
+  content: '// ';
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 20px;
+}
+
+.doc-h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 40px 0 12px;
+}
+
+.doc-h3 {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 24px 0 8px;
+}
+
+.doc-p {
+  font-size: 14px;
+  color: var(--text2);
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+/* ENDPOINT */
+.endpoint-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin: 12px 0;
+  font-family: var(--mono);
+}
+
+.method {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 1px;
+}
+
+.method.GET  { background: rgba(68,138,255,0.15); color: #90b4ff; border: 1px solid rgba(68,138,255,0.3); }
+.method.POST { background: rgba(0,230,118,0.12); color: #69f0ae; border: 1px solid rgba(0,230,118,0.25); }
+
+.endpoint-path { font-size: 13px; color: var(--text); }
+
+/* CODE */
+pre {
+  background: #0a0a0a;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 22px;
+  overflow-x: auto;
+  margin: 10px 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.9;
+  color: #c9d1d9;
+  position: relative;
+}
+
+pre .comment { color: var(--text3); }
+pre .key { color: #79c0ff; }
+pre .str { color: #a5d6ff; }
+pre .num { color: #f0883e; }
+pre .bool { color: #ff7b72; }
+
+.ic {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 1px 7px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+}
+
+/* TABLE */
+.tbl-wrap { overflow-x: auto; margin: 12px 0; border-radius: 12px; border: 1px solid var(--border); }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+
+th {
+  background: var(--bg3);
+  color: var(--text2);
+  font-weight: 600;
+  padding: 11px 16px;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,0.01); }
+
+/* BADGES */
+.b { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; font-family: var(--mono); letter-spacing: 0.5px; }
+.b-req  { background: rgba(68,138,255,0.12); color: #90b4ff; border: 1px solid rgba(68,138,255,0.2); }
+.b-opt  { background: var(--bg4); color: var(--text3); border: 1px solid var(--border); }
+.b-ok   { background: rgba(0,230,118,0.12); color: #69f0ae; border: 1px solid rgba(0,230,118,0.2); }
+.b-pend { background: rgba(255,152,0,0.12); color: #ffcc80; border: 1px solid rgba(255,152,0,0.2); }
+.b-exp  { background: rgba(255,82,82,0.1); color: #ff8a80; border: 1px solid rgba(255,82,82,0.15); }
+
+/* CALLOUT */
+.callout {
+  border-left: 3px solid var(--accent);
+  background: rgba(0,229,255,0.04);
+  border-radius: 0 10px 10px 0;
+  padding: 14px 18px;
+  margin: 14px 0;
+  font-size: 13px;
+  color: var(--text2);
   line-height: 1.8;
 }
 
-.instruksi strong { color: #fff; display: block; margin-bottom: 8px; }
+.callout.warn { border-color: var(--orange); background: rgba(255,152,0,0.04); color: #ffcc80; }
+
+hr.doc-divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+  .sidebar.open { transform: translateX(0); }
+  .docs-content { margin-left: 0; padding: 24px 20px; max-width: 100vw; }
+  .docs-cover-title { font-size: 34px; }
+  .mobile-menu-btn { display: flex !important; }
+}
+
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  bottom: 24px; right: 24px;
+  z-index: 200;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0,229,255,0.3);
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+/* TRANSITIONS */
+.page { animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-  <button class="menu-btn">☰</button>
-  <div class="coins-badge">COINS: <span id="coinsVal">0</span></div>
-  <button class="profile-btn">👤</button>
-</div>
+<!-- ================================
+     PAGE: PAYMENT
+================================ -->
+<div id="page-payment" class="page active">
 
-<!-- INVOICE & TITLE -->
-<div class="invoice-id" id="invoiceId">#INV-...</div>
-<div class="page-title">PAYMENT</div>
-<div class="page-sub">Complete your payment</div>
-
-<!-- COUNTDOWN -->
-<div class="countdown-wrap">
-  <div class="countdown-box" id="countdown">--:--</div>
-</div>
-
-<!-- INPUT NOMINAL -->
-<div class="input-wrap">
-  <input type="number" id="nominal" placeholder="Masukkan nominal (Rp)" min="1">
-  <button class="btn-buat" id="btnBuat" onclick="createQR()">Buat QRIS</button>
-</div>
-
-<!-- QR CARD -->
-<div class="qr-card">
-  <div class="qr-card-header">
-    <span class="qr-card-title">SCAN QRIS</span>
-    <span class="qr-tab-active">QRIS</span>
+  <div class="topnav">
+    <div class="nav-logo">FALLSHOP</div>
+    <div class="nav-right">
+      <button class="nav-btn" onclick="showDocs()" title="API Docs">📄</button>
+      <button class="nav-btn" title="Profile">👤</button>
+    </div>
   </div>
-  <div class="qr-body" id="qrBody">
-    <div class="qr-placeholder">Masukkan nominal dan klik Buat QRIS</div>
+
+  <div class="inv-label" id="invoiceId">#INV-...</div>
+  <div class="page-heading">PAY<span>MENT</span></div>
+  <div class="page-sub">Complete your payment via QRIS</div>
+
+  <div class="cd-wrap">
+    <div class="cd-box">
+      <div class="cd-dot" id="cdDot"></div>
+      <div class="cd-time" id="countdown">--:--</div>
+    </div>
+  </div>
+
+  <div class="input-row">
+    <input type="number" id="nominal" placeholder="Masukkan nominal (min Rp2)" min="2">
+    <button class="btn-create" id="btnBuat" onclick="createQR()">⚡ Buat QRIS</button>
+  </div>
+
+  <div class="qr-card">
+    <div class="qr-card-top">
+      <span class="qr-card-label">Scan QRIS</span>
+      <span class="qr-badge">QRIS</span>
+    </div>
+    <div class="qr-body" id="qrBody">
+      <div class="qr-empty">
+        <span class="icon">⬛</span>
+        Masukkan nominal dan klik Buat QRIS
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar" id="statusWrap"></div>
+
+  <div class="detail-card" id="detailCard" style="display:none">
+    <div class="detail-row">
+      <span class="detail-key">Nominal</span>
+      <span class="detail-val" id="detNominal">-</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-key">Biaya Admin</span>
+      <span class="detail-val" id="detFee">Rp0</span>
+    </div>
+    <div class="detail-row">
+      <span class="detail-key">Total</span>
+      <span class="detail-val accent" id="detTotal">-</span>
+    </div>
+  </div>
+
+  <div class="instruksi" id="instruksiBox" style="display:none">
+    <span class="ins-title">Instructions</span>
+    1. Open your e-wallet app (DANA, GoPay, OVO, ShopeePay)<br>
+    2. Scan the QRIS code above<br>
+    3. Pay exactly <strong id="instrTotal" style="color:var(--accent)">Rp0</strong>
+  </div>
+
+  <button class="btn-back" onclick="resetForm()">← Reset</button>
+  <button class="btn-docs" onclick="showDocs()">📄 API Documentation</button>
+
+</div>
+
+<!-- ================================
+     PAGE: DOCS
+================================ -->
+<div id="page-docs" class="page">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-name">FALLSHOP</div>
+      <div class="brand-sub">API Documentation v1.0</div>
+    </div>
+
+    <button class="sidebar-back" onclick="showPayment()">← Back to Payment</button>
+
+    <div class="sidebar-section">General</div>
+    <a href="#overview" onclick="closeMobileSidebar()"><span class="dot"></span> Overview</a>
+    <a href="#auth" onclick="closeMobileSidebar()"><span class="dot"></span> Autentikasi</a>
+    <a href="#errors" onclick="closeMobileSidebar()"><span class="dot"></span> Kode Error</a>
+    <a href="#env" onclick="closeMobileSidebar()"><span class="dot"></span> Environment Variables</a>
+
+    <div class="sidebar-section">Public API</div>
+    <a href="#create" onclick="closeMobileSidebar()"><span class="dot"></span> POST /qris/create</a>
+    <a href="#status" onclick="closeMobileSidebar()"><span class="dot"></span> GET /qris/status</a>
+    <a href="#history" onclick="closeMobileSidebar()"><span class="dot"></span> GET /qris/history</a>
+
+    <div class="sidebar-section">Internal (Web)</div>
+    <a href="#web-create" onclick="closeMobileSidebar()"><span class="dot"></span> POST /create</a>
+    <a href="#web-status" onclick="closeMobileSidebar()"><span class="dot"></span> GET /status/:id</a>
+
+    <div class="sidebar-section">Callback</div>
+    <a href="#callback" onclick="closeMobileSidebar()"><span class="dot"></span> SMP Payment</a>
+
+    <div class="sidebar-section">Code Examples</div>
+    <a href="#python" onclick="closeMobileSidebar()"><span class="dot"></span> Python</a>
+    <a href="#javascript" onclick="closeMobileSidebar()"><span class="dot"></span> JavaScript</a>
+    <a href="#php" onclick="closeMobileSidebar()"><span class="dot"></span> PHP</a>
+  </div>
+
+  <!-- MOBILE MENU -->
+  <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileSidebar()">☰</button>
+
+  <!-- CONTENT -->
+  <div class="docs-content">
+
+    <!-- COVER -->
+    <div class="docs-cover">
+      <div class="docs-cover-tag">// documentation</div>
+      <div class="docs-cover-title">QRIS <span>API</span></div>
+      <div class="docs-cover-sub">Dokumentasi lengkap Web API Fallshop Payment System</div>
+      <div class="docs-cover-url">https://apinyapadam.vercel.app</div>
+      <div class="docs-meta">
+        <div class="docs-meta-item"><span class="k">VERSION</span><span class="v">1.0.0</span></div>
+        <div class="docs-meta-item"><span class="k">FORMAT</span><span class="v">JSON</span></div>
+        <div class="docs-meta-item"><span class="k">MIN DEPOSIT</span><span class="v">Rp500</span></div>
+        <div class="docs-meta-item"><span class="k">TIMEOUT</span><span class="v">300s</span></div>
+      </div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="doc-section" id="overview">
+      <div class="doc-h1">Overview</div>
+      <p class="doc-p">API ini digunakan untuk membuat QRIS dinamis, mengecek status pembayaran, melihat riwayat transaksi, dan menerima callback dari SMP Payment. Semua endpoint menggunakan format JSON.</p>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Property</th><th>Value</th></tr>
+          <tr><td>Base URL</td><td>https://apinyapadam.vercel.app</td></tr>
+          <tr><td>Auth (Public API)</td><td>?api_key=xxx — URL parameter</td></tr>
+          <tr><td>Auth (Callback)</td><td>/:key — URL path</td></tr>
+          <tr><td>Minimal Deposit</td><td>Rp500</td></tr>
+          <tr><td>Timeout Transaksi</td><td>5 menit (300 detik)</td></tr>
+          <tr><td>Storage</td><td>Upstash Redis</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- AUTH -->
+    <div class="doc-section" id="auth">
+      <div class="doc-h1">Autentikasi</div>
+      <p class="doc-p">Semua endpoint Public API menggunakan API Key sebagai URL parameter.</p>
+      <div class="doc-h3">Format</div>
+      <pre>GET/POST https://apinyapadam.vercel.app/api/qris/[endpoint]?api_key=YOUR_API_KEY</pre>
+      <p class="doc-p">Response jika API Key tidak valid:</p>
+      <pre>{ "success": false, "message": "API key tidak valid" }</pre>
+    </div>
+
+    <!-- CREATE -->
+    <div class="doc-section" id="create">
+      <div class="doc-h1">Buat QRIS</div>
+      <div class="endpoint-box">
+        <span class="method POST">POST</span>
+        <span class="endpoint-path">/api/qris/create?api_key=xxx</span>
+      </div>
+      <p class="doc-p">Membuat QRIS dinamis baru. Mengembalikan gambar QR base64 dan ID transaksi.</p>
+
+      <div class="doc-h3">Request Body (JSON)</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Field</th><th>Type</th><th>Required</th><th>Keterangan</th></tr>
+          <tr><td>amount</td><td>integer</td><td><span class="b b-req">WAJIB</span></td><td>Nominal dalam Rupiah, minimal 500</td></tr>
+        </table>
+      </div>
+
+      <div class="doc-h3">Contoh Request</div>
+      <pre>curl -X POST \
+  "https://apinyapadam.vercel.app/api/qris/create?api_key=fallshop-api-key" \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 10000}'</pre>
+
+      <div class="doc-h3">Response Sukses (200)</div>
+      <pre>{
+  "success": true,
+  "data": {
+    "id": "1773462159100723",
+    "amount": 10000,
+    "qris_string": "00020101021126670016...",
+    "qr_image": "data:image/png;base64,iVBORw0KGgo...",
+    "expired_in": 300
+  }
+}</pre>
+
+      <div class="doc-h3">Response Error (400)</div>
+      <pre>{ "success": false, "message": "Minimal deposit Rp500" }</pre>
+
+      <div class="callout">
+        💡 <strong>id</strong> — simpan untuk cek status pembayaran.<br>
+        💡 <strong>qr_image</strong> — PNG base64, langsung tampilkan di HTML atau kirim ke Telegram.<br>
+        💡 <strong>qris_string</strong> — string QRIS mentah jika ingin generate QR sendiri.
+      </div>
+    </div>
+
+    <hr class="doc-divider">
+
+    <!-- STATUS -->
+    <div class="doc-section" id="status">
+      <div class="doc-h1">Cek Status Pembayaran</div>
+      <div class="endpoint-box">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/qris/status?api_key=xxx&id=xxx</span>
+      </div>
+      <p class="doc-p">Mengecek status transaksi berdasarkan ID dari endpoint create.</p>
+
+      <div class="doc-h3">Query Parameters</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Keterangan</th></tr>
+          <tr><td>api_key</td><td>string</td><td><span class="b b-req">WAJIB</span></td><td>API Key autentikasi</td></tr>
+          <tr><td>id</td><td>string</td><td><span class="b b-req">WAJIB</span></td><td>ID transaksi dari endpoint create</td></tr>
+        </table>
+      </div>
+
+      <div class="doc-h3">Contoh Request</div>
+      <pre>curl "https://apinyapadam.vercel.app/api/qris/status?api_key=fallshop-api-key&id=1773462159100723"</pre>
+
+      <div class="doc-h3">Response SUCCESS</div>
+      <pre>{
+  "success": true,
+  "data": {
+    "id": "1773462159100723",
+    "status": "SUCCESS",
+    "amount": 10000,
+    "paid_at": "2026-03-14 11:31:52",
+    "payer": "Jhon Doe",
+    "issuer": "DANA"
+  }
+}</pre>
+
+      <div class="doc-h3">Nilai Status</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Status</th><th>Keterangan</th></tr>
+          <tr><td><span class="b b-pend">PENDING</span></td><td>Menunggu pembayaran</td></tr>
+          <tr><td><span class="b b-ok">SUCCESS</span></td><td>Pembayaran berhasil diterima</td></tr>
+          <tr><td><span class="b b-exp">EXPIRED</span></td><td>Waktu habis, belum dibayar</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <hr class="doc-divider">
+
+    <!-- HISTORY -->
+    <div class="doc-section" id="history">
+      <div class="doc-h1">Riwayat Transaksi</div>
+      <div class="endpoint-box">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/qris/history?api_key=xxx</span>
+      </div>
+      <p class="doc-p">Mengambil daftar transaksi terbaru. Mendukung pagination dan filter status.</p>
+
+      <div class="doc-h3">Query Parameters</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Keterangan</th></tr>
+          <tr><td>api_key</td><td>string</td><td><span class="b b-req">WAJIB</span></td><td>API Key autentikasi</td></tr>
+          <tr><td>limit</td><td>integer</td><td><span class="b b-opt">OPSIONAL</span></td><td>Jumlah data (default: 20, max: 100)</td></tr>
+          <tr><td>page</td><td>integer</td><td><span class="b b-opt">OPSIONAL</span></td><td>Nomor halaman (default: 1)</td></tr>
+          <tr><td>status</td><td>string</td><td><span class="b b-opt">OPSIONAL</span></td><td>Filter: SUCCESS / PENDING / EXPIRED</td></tr>
+        </table>
+      </div>
+
+      <div class="doc-h3">Contoh Request</div>
+      <pre><span class="comment"># 10 terbaru</span>
+curl "https://apinyapadam.vercel.app/api/qris/history?api_key=fallshop-api-key&limit=10"
+
+<span class="comment"># Filter sukses saja</span>
+curl "https://apinyapadam.vercel.app/api/qris/history?api_key=fallshop-api-key&status=SUCCESS"</pre>
+
+      <div class="doc-h3">Response</div>
+      <pre>{
+  "success": true,
+  "data": [
+    {
+      "id": "1773462159100723",
+      "amount": 10000,
+      "status": "SUCCESS",
+      "payer": "Jhon Doe",
+      "issuer": "DANA",
+      "created_at": 1741942159100,
+      "paid_at": "2026-03-14 11:31:52"
+    }
+  ],
+  "meta": { "total": 42, "page": 1, "limit": 20, "total_pages": 3 }
+}</pre>
+    </div>
+
+    <hr class="doc-divider">
+
+    <!-- WEB INTERNAL -->
+    <div class="doc-section" id="web-create">
+      <div class="doc-h1">Buat QRIS (Web Internal)</div>
+      <div class="endpoint-box">
+        <span class="method POST">POST</span>
+        <span class="endpoint-path">/api/create</span>
+      </div>
+      <p class="doc-p">Digunakan halaman web internal. Tidak memerlukan API Key.</p>
+      <div class="doc-h3">Request Body</div>
+      <pre>{ "amount": 10000 }</pre>
+      <div class="doc-h3">Response</div>
+      <pre>{ "id": "...", "amount": 10000, "qris_string": "...", "qr": "data:image/png;...", "expired": 300 }</pre>
+    </div>
+
+    <div class="doc-section" id="web-status">
+      <div class="doc-h1">Cek Status (Web Internal)</div>
+      <div class="endpoint-box">
+        <span class="method GET">GET</span>
+        <span class="endpoint-path">/api/status/:id</span>
+      </div>
+      <p class="doc-p">Digunakan halaman web untuk polling. Tidak memerlukan API Key.</p>
+      <div class="doc-h3">Contoh</div>
+      <pre>GET /api/status/1773462159100723</pre>
+      <div class="doc-h3">Response</div>
+      <pre>{ "status": "SUCCESS", "data": { ... } }</pre>
+    </div>
+
+    <hr class="doc-divider">
+
+    <!-- CALLBACK -->
+    <div class="doc-section" id="callback">
+      <div class="doc-h1">Callback SMP Payment</div>
+      <p class="doc-p">SMP Payment mengirim HTTP POST ke URL callback setiap transaksi berhasil.</p>
+
+      <div class="doc-h2">URL Callback</div>
+      <pre>https://apinyapadam.vercel.app/api/callbackqris/{KEY}</pre>
+      <div class="callout warn">⚠️ Ganti {KEY} dengan nilai CALLBACK_SECRET di Vercel. Contoh: <span class="ic">fallshop</span></div>
+      <pre>https://apinyapadam.vercel.app/api/callbackqris/fallshop</pre>
+
+      <div class="doc-h2">Payload yang Diterima</div>
+      <pre>{
+  "us_username": "fallshop",
+  "tr_id": "018230241703",
+  "issuer": "DANA",
+  "PayerName": "Jhon Doe",
+  "rrn": "018230241703",
+  "amount": { "value": "10000.00" },
+  "saldo_akhir": 62000,
+  "timestamp": "2026-03-14 11:31:52"
+}</pre>
+
+      <div class="doc-h2">Response yang Dikembalikan</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Kondisi</th><th>responseCode</th><th>responseMessage</th></tr>
+          <tr><td>Berhasil</td><td>2005200</td><td>Request has been processed successfully</td></tr>
+          <tr><td>RRN duplikat</td><td>2005201</td><td>RRN already processed</td></tr>
+          <tr><td>Username salah</td><td>4015200</td><td>Username invalid</td></tr>
+          <tr><td>Key salah</td><td>4015200</td><td>Unauthorized</td></tr>
+          <tr><td>RRN kosong</td><td>4005200</td><td>RRN missing</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <hr class="doc-divider">
+
+    <!-- PYTHON -->
+    <div class="doc-section" id="python">
+      <div class="doc-h1">Python</div>
+      <p class="doc-p">Install: <span class="ic">pip install requests</span></p>
+      <pre><span class="comment"># bot.py / termux</span>
+import requests, base64
+
+BASE_URL = "https://apinyapadam.vercel.app"
+API_KEY  = "fallshop-api-key"
+
+<span class="comment"># Buat QRIS</span>
+res = requests.post(
+    f"{BASE_URL}/api/qris/create",
+    params={"api_key": API_KEY},
+    json={"amount": 10000}
+)
+trx = res.json()["data"]
+print("ID:", trx["id"])
+
+<span class="comment"># Simpan gambar QR</span>
+b64 = trx["qr_image"].split(",")[1]
+with open("qris.png", "wb") as f:
+    f.write(base64.b64decode(b64))
+
+<span class="comment"># Cek status</span>
+res = requests.get(
+    f"{BASE_URL}/api/qris/status",
+    params={"api_key": API_KEY, "id": trx["id"]}
+)
+print("Status:", res.json()["data"]["status"])
+
+<span class="comment"># Riwayat</span>
+res = requests.get(
+    f"{BASE_URL}/api/qris/history",
+    params={"api_key": API_KEY, "limit": 10, "status": "SUCCESS"}
+)
+for item in res.json()["data"]:
+    print(f"Rp{item['amount']} - {item['status']}")</pre>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <div class="doc-section" id="javascript">
+      <div class="doc-h1">JavaScript</div>
+      <pre>const BASE_URL = "https://apinyapadam.vercel.app";
+const API_KEY  = "fallshop-api-key";
+
+<span class="comment">// Buat QRIS</span>
+const res = await fetch(`${BASE_URL}/api/qris/create?api_key=${API_KEY}`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ amount: 10000 })
+});
+const { data } = await res.json();
+console.log("ID:", data.id);
+
+<span class="comment">// Cek status</span>
+const r = await fetch(`${BASE_URL}/api/qris/status?api_key=${API_KEY}&id=${data.id}`);
+const result = await r.json();
+console.log("Status:", result.data.status);
+
+<span class="comment">// Polling otomatis tiap 5 detik</span>
+function pollStatus(id, onSuccess) {
+  const t = setInterval(async () => {
+    const r = await fetch(`${BASE_URL}/api/qris/status?api_key=${API_KEY}&id=${id}`);
+    const d = await r.json();
+    if (d.data.status !== "PENDING") {
+      clearInterval(t);
+      onSuccess(d.data);
+    }
+  }, 5000);
+}</pre>
+    </div>
+
+    <!-- PHP -->
+    <div class="doc-section" id="php">
+      <div class="doc-h1">PHP</div>
+      <pre>&lt;?php
+$BASE_URL = "https://apinyapadam.vercel.app";
+$API_KEY  = "fallshop-api-key";
+
+<span class="comment">// Buat QRIS</span>
+$ch = curl_init();
+curl_setopt_array($ch, [
+  CURLOPT_URL => "$BASE_URL/api/qris/create?api_key=$API_KEY",
+  CURLOPT_POST => true,
+  CURLOPT_POSTFIELDS => json_encode(["amount" => 10000]),
+  CURLOPT_HTTPHEADER => ["Content-Type: application/json"],
+  CURLOPT_RETURNTRANSFER => true
+]);
+$res   = json_decode(curl_exec($ch), true);
+$id    = $res["data"]["id"];
+$qr_b64 = explode(",", $res["data"]["qr_image"])[1];
+file_put_contents("qris.png", base64_decode($qr_b64));
+
+<span class="comment">// Cek status</span>
+curl_setopt($ch, CURLOPT_URL, "$BASE_URL/api/qris/status?api_key=$API_KEY&id=$id");
+curl_setopt($ch, CURLOPT_POST, false);
+curl_setopt($ch, CURLOPT_HTTPGET, true);
+$status = json_decode(curl_exec($ch), true);
+echo $status["data"]["status"];
+?&gt;</pre>
+    </div>
+
+    <!-- ENV -->
+    <div class="doc-section" id="env">
+      <div class="doc-h1">Environment Variables</div>
+      <p class="doc-p">Set di Vercel Dashboard → Settings → Environment Variables.</p>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>Variable</th><th>Contoh Value</th><th>Keterangan</th></tr>
+          <tr><td>UPSTASH_REDIS_REST_URL</td><td>https://xxx.upstash.io</td><td>URL REST Upstash Redis</td></tr>
+          <tr><td>UPSTASH_REDIS_REST_TOKEN</td><td>AXxx...</td><td>Token Upstash Redis</td></tr>
+          <tr><td>CALLBACK_SECRET</td><td>fallshop</td><td>Key rahasia di URL callback</td></tr>
+          <tr><td>QRIS_USERNAME</td><td>fallshop</td><td>Username akun SMP Payment</td></tr>
+          <tr><td>API_KEY</td><td>fallshop-api-key</td><td>API Key untuk public endpoint</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ERRORS -->
+    <div class="doc-section" id="errors">
+      <div class="doc-h1">Kode Error</div>
+      <div class="tbl-wrap">
+        <table>
+          <tr><th>HTTP</th><th>success</th><th>Keterangan</th></tr>
+          <tr><td>200</td><td>true</td><td>Request berhasil</td></tr>
+          <tr><td>400</td><td>false</td><td>Parameter tidak valid / minimal tidak terpenuhi</td></tr>
+          <tr><td>401</td><td>false</td><td>API Key tidak valid</td></tr>
+          <tr><td>404</td><td>false</td><td>Transaksi tidak ditemukan</td></tr>
+          <tr><td>405</td><td>false</td><td>HTTP Method tidak diizinkan</td></tr>
+          <tr><td>500</td><td>false</td><td>Server error (Redis gagal)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div style="text-align:center; padding: 48px 0 0; color: var(--text3); font-family: var(--mono); font-size: 11px; letter-spacing: 1px; border-top: 1px solid var(--border);">
+      FALLSHOP QRIS API &nbsp;·&nbsp; apinyapadam.vercel.app &nbsp;·&nbsp; v1.0.0 &nbsp;·&nbsp; 2026
+    </div>
+
   </div>
 </div>
 
-<!-- STATUS -->
-<div class="status-wrap" id="statusWrap"></div>
-
-<!-- DETAIL HARGA -->
-<div class="detail-card" id="detailCard" style="display:none">
-  <div class="detail-row">
-    <span class="detail-label">Nominal</span>
-    <span class="detail-value" id="detNominal">-</span>
-  </div>
-  <div class="detail-row">
-    <span class="detail-label">Biaya Admin</span>
-    <span class="detail-value" id="detFee">Rp0</span>
-  </div>
-  <div class="detail-row">
-    <span class="detail-label">Total</span>
-    <span class="detail-value total" id="detTotal">-</span>
-  </div>
-</div>
-
-<!-- INSTRUKSI -->
-<div class="instruksi" id="instruksiBox" style="display:none">
-  <strong>Instructions:</strong>
-  1. Open your e-wallet app (DANA, GoPay, OVO, etc.)<br>
-  2. Scan the QRIS code above<br>
-  3. Pay exactly <strong id="instrTotal">Rp0</strong>
-</div>
-
-<!-- BACK BUTTON -->
-<button class="btn-back" onclick="resetForm()">Back</button>
-
+<!-- ================================
+     SCRIPTS
+================================ -->
 <script>
 
+// ========================
+// PAGE NAVIGATION
+// ========================
+function showDocs() {
+  document.getElementById('page-payment').classList.remove('active')
+  document.getElementById('page-docs').classList.add('active')
+  window.scrollTo(0, 0)
+}
+
+function showPayment() {
+  document.getElementById('page-docs').classList.remove('active')
+  document.getElementById('page-payment').classList.add('active')
+  window.scrollTo(0, 0)
+}
+
+function toggleMobileSidebar() {
+  document.getElementById('sidebar').classList.toggle('open')
+}
+
+function closeMobileSidebar() {
+  document.getElementById('sidebar').classList.remove('open')
+}
+
+// Sidebar active link on scroll
+const docsContent = document.querySelector('.docs-content')
+if (docsContent) {
+  docsContent.addEventListener('scroll', updateActiveLink)
+  window.addEventListener('scroll', updateActiveLink)
+}
+
+function updateActiveLink() {
+  const sections = document.querySelectorAll('.doc-section[id], .docs-cover')
+  const links = document.querySelectorAll('.sidebar a')
+  let current = ''
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 100) current = s.id
+  })
+  links.forEach(a => {
+    a.classList.remove('active')
+    if (a.getAttribute('href') === '#' + current) a.classList.add('active')
+  })
+}
+
+// ========================
+// PAYMENT LOGIC
+// ========================
 let currentRRN = null
 let timerInterval = null
 let statusTimeout = null
@@ -368,9 +1351,6 @@ function generateInvoiceId() {
   return "#INV-" + d + "-" + t + "-" + rand
 }
 
-// =======================
-// CREATE QR
-// =======================
 async function createQR() {
   const nominal = document.getElementById("nominal").value
   if (!nominal || parseInt(nominal) < 2) {
@@ -379,14 +1359,11 @@ async function createQR() {
   }
 
   stopPolling()
-
   document.getElementById("btnBuat").disabled = true
-  document.getElementById("qrBody").innerHTML = '<div class="qr-placeholder">Membuat QR...</div>'
+  document.getElementById("qrBody").innerHTML = '<div class="qr-empty"><span class="icon">⏳</span>Membuat QRIS...</div>'
   document.getElementById("statusWrap").innerHTML = ""
   document.getElementById("detailCard").style.display = "none"
   document.getElementById("instruksiBox").style.display = "none"
-
-  // Set invoice id
   document.getElementById("invoiceId").innerText = generateInvoiceId()
 
   try {
@@ -395,77 +1372,53 @@ async function createQR() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount: nominal })
     })
-
     const data = await res.json()
-
     if (!data.id || !data.qr) throw new Error("Response tidak valid")
 
-    // Tampilkan QR
-    document.getElementById("qrBody").innerHTML =
-      '<img src="' + data.qr + '" alt="QRIS">'
+    document.getElementById("qrBody").innerHTML = '<img src="' + data.qr + '" alt="QRIS">'
 
-    // Tampilkan detail harga
-    const fee = 0
-    const total = parseInt(nominal) + fee
+    const fee = 0, total = parseInt(nominal) + fee
     document.getElementById("detNominal").innerText = formatRupiah(nominal)
     document.getElementById("detFee").innerText = formatRupiah(fee)
     document.getElementById("detTotal").innerText = formatRupiah(total)
     document.getElementById("instrTotal").innerText = formatRupiah(total)
     document.getElementById("detailCard").style.display = "block"
     document.getElementById("instruksiBox").style.display = "block"
-
-    // Status
-    document.getElementById("statusWrap").innerHTML =
-      '<span class="status-pending">⏳ Status: Menunggu Pembayaran</span>'
+    document.getElementById("statusWrap").innerHTML = '<span class="s-pending">⏳ Menunggu Pembayaran...</span>'
 
     currentRRN = data.id
-
-    // Simpan session
-    localStorage.setItem("qris_session", JSON.stringify({
-      id: data.id,
-      qr: data.qr,
-      amount: nominal,
-      created_at: Date.now()
-    }))
-
+    localStorage.setItem("qris_session", JSON.stringify({ id: data.id, qr: data.qr, amount: nominal, created_at: Date.now() }))
     startCountdown(300)
     startPolling()
 
   } catch(e) {
-    document.getElementById("qrBody").innerHTML = '<div class="qr-placeholder">Gagal membuat QR. Coba lagi.</div>'
-    document.getElementById("statusWrap").innerHTML = '<span class="status-expired">❌ Error: ' + e.message + '</span>'
+    document.getElementById("qrBody").innerHTML = '<div class="qr-empty"><span class="icon">❌</span>Gagal membuat QR. Coba lagi.</div>'
+    document.getElementById("statusWrap").innerHTML = '<span class="s-expired">Error: ' + e.message + '</span>'
   }
 
   document.getElementById("btnBuat").disabled = false
 }
 
-// =======================
-// COUNTDOWN
-// =======================
 function startCountdown(detikMulai) {
   let sisa = detikMulai
   if (timerInterval) clearInterval(timerInterval)
-
-  timerInterval = setInterval(function() {
+  timerInterval = setInterval(() => {
     sisa--
-    const m = Math.floor(sisa / 60).toString().padStart(2, "0")
-    const s = (sisa % 60).toString().padStart(2, "0")
-    document.getElementById("countdown").innerText = m + ":" + s
-
+    const m = Math.floor(sisa/60).toString().padStart(2,"0")
+    const s = (sisa%60).toString().padStart(2,"0")
+    document.getElementById("countdown").innerText = m+":"+s
     if (sisa <= 0) {
       clearInterval(timerInterval)
       stopPolling()
-      document.getElementById("statusWrap").innerHTML = '<span class="status-expired">⏰ QR Expired</span>'
+      document.getElementById("statusWrap").innerHTML = '<span class="s-expired">⏰ QR Expired</span>'
       document.getElementById("countdown").innerText = "00:00"
+      document.getElementById("cdDot").style.background = "var(--red)"
       localStorage.removeItem("qris_session")
       currentRRN = null
     }
   }, 1000)
 }
 
-// =======================
-// POLLING STATUS
-// =======================
 function startPolling() {
   if (isPolling) return
   isPolling = true
@@ -476,66 +1429,48 @@ function stopPolling() {
   isPolling = false
   if (statusTimeout) clearTimeout(statusTimeout)
   if (timerInterval) clearInterval(timerInterval)
-  statusTimeout = null
-  timerInterval = null
+  statusTimeout = null; timerInterval = null
 }
 
 async function pollStatus() {
   if (!isPolling || !currentRRN) return
-
   try {
     const res = await fetch("/api/status/" + currentRRN)
     const data = await res.json()
-
     if (data.status === "SUCCESS") {
       stopPolling()
-      document.getElementById("statusWrap").innerHTML = '<span class="status-success">✅ PAID — Pembayaran Berhasil!</span>'
+      document.getElementById("statusWrap").innerHTML = '<span class="s-success">✅ PAID — Pembayaran Berhasil!</span>'
       document.getElementById("countdown").innerText = "✓"
+      document.getElementById("cdDot").style.background = "var(--green)"
+      document.getElementById("cdDot").style.animation = "none"
       localStorage.removeItem("qris_session")
       currentRRN = null
       return
     }
-
     if (data.status === "EXPIRED") {
       stopPolling()
-      document.getElementById("statusWrap").innerHTML = '<span class="status-expired">⏰ QR Expired</span>'
+      document.getElementById("statusWrap").innerHTML = '<span class="s-expired">⏰ QR Expired</span>'
       localStorage.removeItem("qris_session")
       currentRRN = null
       return
     }
-
     if (isPolling) statusTimeout = setTimeout(pollStatus, 5000)
-
   } catch(e) {
     if (isPolling) statusTimeout = setTimeout(pollStatus, 5000)
   }
 }
 
-// =======================
-// LOAD SESSION (refresh)
-// =======================
 function loadSession() {
   const saved = localStorage.getItem("qris_session")
   if (!saved) return
-
   let session
-  try { session = JSON.parse(saved) } catch(e) {
-    localStorage.removeItem("qris_session")
-    return
-  }
-
+  try { session = JSON.parse(saved) } catch(e) { localStorage.removeItem("qris_session"); return }
   const umur = Date.now() - session.created_at
-  if (umur >= 300000) {
-    localStorage.removeItem("qris_session")
-    return
-  }
-
+  if (umur >= 300000) { localStorage.removeItem("qris_session"); return }
   const sisaDetik = Math.floor((300000 - umur) / 1000)
-
   document.getElementById("invoiceId").innerText = generateInvoiceId()
   document.getElementById("qrBody").innerHTML = '<img src="' + session.qr + '" alt="QRIS">'
-  document.getElementById("statusWrap").innerHTML = '<span class="status-pending">⏳ Status: Menunggu Pembayaran</span>'
-
+  document.getElementById("statusWrap").innerHTML = '<span class="s-pending">⏳ Menunggu Pembayaran...</span>'
   if (session.amount) {
     document.getElementById("detNominal").innerText = formatRupiah(session.amount)
     document.getElementById("detFee").innerText = "Rp0"
@@ -544,30 +1479,27 @@ function loadSession() {
     document.getElementById("detailCard").style.display = "block"
     document.getElementById("instruksiBox").style.display = "block"
   }
-
   currentRRN = session.id
   startCountdown(sisaDetik)
   startPolling()
 }
 
-// =======================
-// RESET
-// =======================
 function resetForm() {
   stopPolling()
   currentRRN = null
   localStorage.removeItem("qris_session")
-  document.getElementById("qrBody").innerHTML = '<div class="qr-placeholder">Masukkan nominal dan klik Buat QRIS</div>'
+  document.getElementById("qrBody").innerHTML = '<div class="qr-empty"><span class="icon">⬛</span>Masukkan nominal dan klik Buat QRIS</div>'
   document.getElementById("statusWrap").innerHTML = ""
   document.getElementById("countdown").innerText = "--:--"
   document.getElementById("nominal").value = ""
   document.getElementById("detailCard").style.display = "none"
   document.getElementById("instruksiBox").style.display = "none"
   document.getElementById("invoiceId").innerText = "#INV-..."
+  document.getElementById("cdDot").style.background = "var(--accent)"
+  document.getElementById("cdDot").style.animation = ""
 }
 
 document.addEventListener("DOMContentLoaded", loadSession)
-
 </script>
 </body>
 </html>
